@@ -1,9 +1,9 @@
-import React from 'react'
+import { ReactNode } from "react";
 
-export function SectionTitle({ children, light = false }: { children: React.ReactNode, light?: boolean }) {
+export default function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className={`text-sm font-medium ${light ? 'text-white' : 'text-slate-900'}`}>
-      {children}
-    </h2>
-  )
+    <div className="flex items-center justify-between">
+      <h2 className="text-lg font-semibold text-gray-900">{children}</h2>
+    </div>
+  );
 }
