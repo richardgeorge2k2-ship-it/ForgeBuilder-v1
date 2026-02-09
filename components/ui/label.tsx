@@ -1,14 +1,11 @@
 import { LabelHTMLAttributes } from "react";
-import clsx from "clsx";
 
-export function Label({
-  className,
-  ...props
-}: LabelHTMLAttributes<HTMLLabelElement>) {
+export function Label(props: LabelHTMLAttributes<HTMLLabelElement>) {
+  const { className = "", ...rest } = props;
   return (
     <label
-      {...props}
-      className={clsx("text-sm font-medium", className)}
+      {...rest}
+      className={"text-sm font-medium text-gray-900 " + className}
     />
   );
 }

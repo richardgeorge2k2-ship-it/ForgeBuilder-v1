@@ -1,17 +1,15 @@
 import { ButtonHTMLAttributes } from "react";
-import clsx from "clsx";
 
-export function Button({
-  className,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
+export function Button(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+  const { className = "", ...rest } = props;
   return (
     <button
-      {...props}
-      className={clsx(
-        "inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-gray-100 disabled:opacity-50",
+      {...rest}
+      className={
+        "inline-flex items-center justify-center rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium " +
+        "bg-black text-white hover:bg-gray-900 active:bg-black transition disabled:opacity-50 " +
         className
-      )}
+      }
     />
   );
 }
