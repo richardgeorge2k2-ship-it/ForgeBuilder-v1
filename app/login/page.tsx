@@ -1,55 +1,24 @@
-'use client'
-
-import Link from 'next/link'
-
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-medium tracking-tight text-slate-900">Welcome back</h1>
-          <p className="text-sm text-slate-500">Sign in to manage your projects.</p>
-        </div>
+    <main className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h1 className="text-xl font-semibold text-slate-900">
+          Sign in
+        </h1>
 
-        <form className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700" htmlFor="email">
-              Email address
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-400 transition-all"
-              required
-            />
-          </div>
+        <p className="mt-2 text-sm text-slate-600">
+          Access your ForgeBuilder workspace.
+        </p>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-400 transition-all"
-              required
-            />
-          </div>
-
+        <div className="mt-6 space-y-4">
           <button
-            type="submit"
-            className="w-full bg-slate-900 text-white py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition-colors"
+            type="button"
+            className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            Sign in
+            Continue
           </button>
-        </form>
-
-        <div className="text-center">
-          <Link href="/signup" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
-            Create an account
-          </Link>
         </div>
       </div>
-    </div>
-  )
+    </main>
+  );
 }
