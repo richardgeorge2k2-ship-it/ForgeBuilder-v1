@@ -1,21 +1,19 @@
+export const dynamic = "force-dynamic";
+
+const fortitle = "ForgeBuilder";
+
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-4xl font-semibold tracking-tight">
-        ForgeBuilder
-      </h1>
-
-      <p className="mt-4 max-w-xl text-slate-600">
-        The operational spine for real businesses.
-        Infrastructure before growth. Ownership before scale.
+    <main style={{ padding: 24 }}>
+      <h1 style={{ fontSize: 28, fontWeight: 700 }}>{fortitle}</h1>
+      <p style={{ marginTop: 8, fontSize: 16 }}>
+        ForgeBuilder is deploying. Core system will live under /app.
       </p>
-
-      <a
-        href="/login"
-        className="mt-8 inline-flex items-center rounded-md bg-black px-6 py-3 text-sm font-medium text-white hover:bg-slate-800 transition"
-      >
-        Start operating
-      </a>
+      <div style={{ marginTop: 16 }}>
+        <a href="/login">Login</a>{" "}
+        <span style={{ margin: "0 8px" }}>|</span>{" "}
+        <a href="/app">Open App</a>
+      </div>
     </main>
   );
 }
