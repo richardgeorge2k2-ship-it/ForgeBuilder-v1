@@ -1,5 +1,5 @@
 import { HTMLAttributes } from "react";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 
 export function Card({
   className,
@@ -8,8 +8,8 @@ export function Card({
   return (
     <div
       {...props}
-      className={clsx(
-        "rounded-2xl border bg-white p-4 shadow-sm",
+      className={cn(
+        "rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200",
         className
       )}
     />

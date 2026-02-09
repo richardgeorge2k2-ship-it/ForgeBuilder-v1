@@ -2,11 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* No global colors; components decide their own colors */
-body {
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
 }
 
-@layer utilities {
-  .text-balance { text-wrap: balance; }
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
 }

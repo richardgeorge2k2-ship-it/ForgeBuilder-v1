@@ -1,10 +1,70 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
+import { Database } from '@/database.types'
 
 export default function BillingPage() {
-  const [isConnected, setIsConnected] = useState(false) // Mock state for Stripe connection
-  const [currentPlan, setCurrentPlan] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [subscription, setSubscription] = useState<Database['public']['Tables']['subscriptions']['Row'] | null>(null)
+  const [profile, setProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
+
+  const supabase = createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  useEffect(() => {
+    async function loadBillingData() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const [subRes, profRes] = await Promise.all([
+        supabase.from('subscriptions').select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
+      ])
+
+      if (subRes.data) setSubscription(subRes.data)
+      if (profRes.data) setProfile(profRes.data)
+      setLoading(false)
+    }
+
+    loadBillingData()
+  }, [supabase])
+
+  const handleCheckout = async (tier: string) => {
+    try {
+      setActionLoading(tier)
+      const res = await fetch(`/api/stripe/checkout?tier=${tier.toLowerCase()}`, { method: 'POST' })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch (error) {
+      console.error('Checkout error:', error)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handlePortal = async () => {
+    try {
+      setActionLoading('portal')
+      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch (error) {
+      console.error('Portal error:', error)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const getPlanName = (priceId: string | null) => {
+    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER) return 'Starter'
+    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO) return 'Pro'
+    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE) return 'Elite'
+    return 'Unknown Plan'
+  }
 
   const plans = [
     {
@@ -23,10 +83,11 @@ export default function BillingPage() {
       ],
       buttonText: 'Start with Starter',
       recommended: false,
+      tier: 'starter'
     },
     {
       name: 'Pro',
-      price: '$dollar;79',
+      price: '$79',
       positioning: 'For operators running a real business.',
       features: [
         'Up to five active projects',
@@ -39,6 +100,7 @@ export default function BillingPage() {
       ],
       buttonText: 'Upgrade to Pro',
       recommended: true,
+      tier: 'pro'
     },
     {
       name: 'Elite',
@@ -54,36 +116,15 @@ export default function BillingPage() {
       ],
       buttonText: 'Upgrade to Elite',
       recommended: false,
+      tier: 'elite'
     },
   ]
 
-  if (!isConnected) {
-    return (
-      <div className="p-8 max-w-6xl mx-auto space-y-8">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-medium text-slate-900">Billing</h1>
-          <p className="text-sm text-slate-500">Manage payments and subscription status.</p>
-        </div>
-
-        <div className="max-w-2xl border border-slate-100 rounded-lg p-8 space-y-6 bg-white">
-          <div className="space-y-2">
-            <h2 className="text font-medium text-slate-900">Connect Stripe to activate billing</h2>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Payments are disabled until a Stripe account is connected. Once connected, you will be able to select a plan and process live revenue.
-            </p>
-          </div>
-          <button 
-            onClick={() => setIsConnected(true)}
-            className="bg-slate-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition-colors"
-          >
-            Connect Stripe
-          </button>
-        </div>
-      </div>
-    )
+  if (loading) {
+    return <div className="p-8 max-w-6xl mx-auto">Loading billing details...</div>
   }
 
-  if (!currentPlan) {
+  if (!subscription || subscription.status !== 'active') {
     return (
       <div className="p-8 max-w-6xl mx-auto space-y-12">
         <div className="space-y-1 text-center">
@@ -97,7 +138,7 @@ export default function BillingPage() {
           {plans.map((plan) => (
             <div 
               key={plan.name} 
-              className={`relative-8 border rounded-xl flex flex-col space-y-6 transition-all ${
+              className={`relative p-8 border rounded-xl flex flex-col space-y-6 transition-all ${
                 plan.recommended 
                   ? 'border-slate-900 shadow-sm ring-1 ring-slate-900' 
                   : 'border-slate-100 hover:border-slate-200'
@@ -119,14 +160,15 @@ export default function BillingPage() {
               </div>
 
               <button 
-                onClick={() => setCurrentPlan(plan.name)}
+                onClick={() => handleCheckout(plan.tier)}
+                disabled={!!actionLoading}
                 className={`w-full py-2 rounded-md text-sm font-medium transition-colors ${
                   plan.recommended 
                     ? 'bg-slate-900 text-white hover:bg-slate-800' 
                     : 'bg-white border border-slate-200 text-slate-900 hover:bg-slate-50'
-                }`}
+                } disabled:opacity-50`}
               >
-                {plan.buttonText}
+                {actionLoading === plan.tier ? 'Redirecting...' : plan.buttonText}
               </button>
 
               <div className="space-y-3 pt-4 border-t border-slate-50">
@@ -147,7 +189,7 @@ export default function BillingPage() {
         </div>
 
         <div className="text-center space-y-2">
-          <p className="text-xs text-slate-400">billing through your own Stripe account • No long-term contracts • Cancel anytime</p>
+          <p className="text-xs text-slate-400">Billing through Stripe • No long-term contracts • Cancel anytime</p>
         </div>
       </div>
     )
@@ -167,23 +209,26 @@ export default function BillingPage() {
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-1">
                 <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Plan</p>
-                <p className="text-sm font-medium text-slate-900">{currentPlan}</p>
+                <p className="text-sm font-medium text-slate-900">{getPlanName(subscription.price_id)}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Status</p>
-                <p className="text-sm font-medium text-emerald-600">Active</p>
+                <p className="text-sm font-medium text-emerald-600 capitalize">{subscription.status}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Next billing date</p>
-                <p className="text-sm text-slate-900">April 13, 2025</p>
+                <p className="text-sm text-slate-900">
+                  {subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : 'N/A'}
+                </p>
               </div>
             </div>
             <div className="pt-4 flex space-x-4">
               <button 
-                onClick={() => setCurrentPlan(null)}
-                className="text-xs font-medium text-slate-900 border border-slate-200 px-4 py-2 rounded hover:bg-slate,ate-50 transition-colors"
+                onClick={handlePortal}
+                disabled={!!actionLoading}
+                className="text-xs font-medium text-slate-900 border border-slate-200 px-4 py-2 rounded hover:bg-slate-50 transition-colors disabled:opacity-50"
               >
-                Manage subscription
+                {actionLoading === 'portal' ? 'Loading...' : 'Manage subscription'}
               </button>
             </div>
           </div>
