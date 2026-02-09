@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-export default function SectionTitle({ children }: { children: ReactNode }) {
+export function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center justify-between">
       <h2 className="text-lg font-semibold text-gray-900">{children}</h2>
