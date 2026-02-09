@@ -340,6 +340,27 @@ export type Database = {
           },
         ]
       }
+      todos: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_completed: boolean | null
+          task: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          task: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          task?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
